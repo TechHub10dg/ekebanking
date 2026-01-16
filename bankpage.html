@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EKE | Secure Internal Ledger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --gold: #D4AF37; --bg: #050505; --card: #0A0A0A; --text: #e0e0e0; 
+            --border: rgba(255,255,255,0.08); --red: #ff4d4d; --green: #4ade80;
+        }
+        * { box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; padding: 40px; }
+        
+        /* Navigation & Header */
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .btn-return { background: transparent; border: 1px solid var(--border); color: #888; padding: 12px 24px; cursor: pointer; border-radius: 4px; font-family: 'IBM Plex Mono'; font-size: 0.8rem; text-decoration: none; }
+        header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .brand { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; letter-spacing: 2px; }
+        .balance-amount { font-size: 3.5rem; font-weight: 600; color: #fff; font-family: 'IBM Plex Mono'; letter-spacing: -2px; }
+
+        /* Grid System */
+        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 60px; }
+        .ledger-container { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 30px; }
+        table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono'; font-size: 0.8rem; }
+        th { text-align: left; padding: 15px; border-bottom: 1px solid #222; color: #555; }
+        td { padding: 18px 15px; border-bottom: 1px solid #111; }
+
+        /* Action Cards */
+        .action-card { background: #0e0e0e; border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px;}
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.6rem; color: #555; margin-bottom: 5px; font-family: 'IBM Plex Mono'; }
+        .input-group input { width: 100%; background: #000; border: 1px solid #222; padding: 12px; color: #fff; font-family: 'IBM Plex Mono'; outline: none; }
+        .btn-action { width: 100%; padding: 15px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: 0.3s; }
+        .btn-send { background: var(--gold); color: #000; }
+        .btn-withdraw { background: transparent; border: 1px solid var(--red); color: var(--red); }
+
+        /* MODALS */
+        #security-overlay, #warning-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(15px);
+        }
+        #security-overlay { background: rgba(0,0,0,0.95); }
+        #warning-overlay { background: rgba(150, 0, 0, 0.4); }
+
+        .modal-content { background: #0A0A0A; border: 1px solid var(--gold); padding: 40px; border-radius: 8px; text-align: center; width: 420px; }
+        .warning-content { background: #000; border: 2px solid var(--red); padding: 50px; border-radius: 4px; text-align: center; max-width: 500px; box-shadow: 0 0 50px rgba(255, 77, 77, 0.3); }
+        
+        /* Personal Vault */
+        .personal-card { background: linear-gradient(145deg, #0f0f0f, #050505); border: 1px solid #222; border-radius: 12px; padding: 30px; display: flex; justify-content: space-between; }
+        .tag { padding: 4px 8px; border-radius: 2px; font-size: 0.65rem; font-weight: 600; }
+        .tag-cmd { border: 1px solid var(--red); color: var(--red); }
+        .tag-sys { border: 1px solid var(--green); color: var(--green); }
+    </style>
+</head>
+<body>
+
+    <div id="security-overlay">
+        <div class="modal-content">
+            <h4 style="color: var(--gold); letter-spacing: 2px;">AUTHORIZATION REQUIRED</h4>
+            <input type="password" id="master-pin" placeholder="••••" style="width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: #fff; text-align: center; font-size: 1.5rem; letter-spacing: 10px; margin: 20px 0;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-action" style="background:#222; color:#fff;" onclick="closeSecurity()">CANCEL</button>
+                <button class="btn-action btn-send" onclick="confirmIdentity()">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="warning-overlay">
+        <div class="warning-content">
+            <h1 style="color: var(--red); font-size: 3rem; margin: 0;">CRITICAL ERROR</h1>
+            <p style="color: #fff; font-weight: bold; font-size: 1.2rem; margin: 20px 0;">DEVICE CANNOT BE ACTIVATED</p>
+            <p style="color: #888; font-family: 'IBM Plex Mono'; font-size: 0.8rem; margin-bottom: 30px;">
+                Unauthorized hardware link detected. External bank sync rejected by local encryption core.
+            </p>
+            <div id="countdown-bar" style="height: 4px; background: var(--red); width: 100%; margin-bottom: 20px;"></div>
+            <button class="btn-action" style="background: var(--red); color: #000;" onclick="cancelDecoy()">MANUAL OVERRIDE</button>
+        </div>
+    </div>
+
+    <div class="nav-header">
+        <a href="index.html" class="btn-return">← BACK</a>
+        <div style="font-size: 0.7rem; color: #444; font-family: 'IBM Plex Mono';">EKE SECURE LEDGER v5.0</div>
+    </div>
+
+    <header>
+        <div class="brand">EVAN KATIE <span style="color:var(--gold)">ENTERPRISES</span></div>
+        <div class="balance-box">
+            <div class="balance-label">CORPORATE LIQUIDITY</div>
+            <div id="balance-display" class="balance-amount">$0.00</div>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <div class="ledger-container">
+            <h2>Transaction History</h2>
+            <table>
+                <thead><tr><th>Timestamp</th><th>Type</th><th>Corridor</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody id="ledger-body"></tbody>
+            </table>
+        </div>
+
+        <div class="action-column">
+            <div class="action-card">
+                <h3>Global Money Order</h3>
+                <div class="input-group"><label>BENEFICIARY</label><input type="text" id="order-dest"></div>
+                <div class="input-group"><label>AMOUNT</label><input type="number" id="order-amt"></div>
+                <button class="btn-action btn-send" onclick="triggerSecurity('order')">AUTHORIZE ORDER</button>
+            </div>
+            <div class="action-card">
+                <h3>Move to Personal Vault</h3>
+                <div class="input-group"><label>AMOUNT</label><input type="number" id="withdraw-amt"></div>
+                <button class="btn-action btn-withdraw" onclick="triggerSecurity('withdraw')">INITIATE TRANSFER</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="personal-vault-container" style="border-top: 1px dashed #333; padding-top: 40px;">
+        <h3 style="color:var(--gold); font-family:'Cormorant Garamond'; margin-bottom:20px;">PERSONAL VAULT</h3>
+        <div class="personal-card">
+            <div style="flex: 1;">
+                <div style="font-size: 0.65rem; color: #888; margin-bottom: 10px;">PRIVATE STASH</div>
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                    <span id="personal-balance" style="font-family:'IBM Plex Mono'; font-size:2.2rem; color:#fff;">$0.00</span>
+                    <button onclick="toggleBalance()" style="background:#111; border:1px solid #333; color:var(--gold); padding:5px; font-size:0.6rem; cursor:pointer;">HIDE/VIEW</button>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-action btn-send" style="width:auto; padding:5px 20px;" onclick="triggerSecurity('reinvest_init')">RE-INVEST ↑</button>
+                    <button class="btn-action btn-withdraw" style="width:auto; padding:5 20px;" onclick="triggerSecurity('external_withdraw')">EXT. WITHDRAWAL</button>
+                </div>
+                <div id="reinvest-input-box" style="display:none; margin-top:15px;">
+                    <input type="number" id="reinvest-amt" placeholder="Amt to Core" style="background:#000; border:1px solid #222; color:#fff; padding:10px; width:150px;">
+                    <button class="btn-action btn-send" style="width:auto; padding:10px 15px;" onclick="execute('reinvest_final')">CONFIRM</button>
+                </div>
+            </div>
+            <div id="personal-history" style="width: 45%; height: 120px; overflow-y: auto; font-family:'IBM Plex Mono'; font-size:0.7rem; border-left:1px solid #222; padding-left:30px;">
+                <div style="color:#444;">[ NO_PERSONAL_HISTORY ]</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MASTER_PASSWORD = "1234"; 
+        let currentBalance = parseFloat(localStorage.getItem('eke_balance')) || 4250000000.00;
+        let personalBalance = parseFloat(localStorage.getItem('personal_vault_bal')) || 0;
+        let isHidden = false, pendingAction = null, decoyTimer = null;
+
+        function updateUI() {
+            document.getElementById('balance-display').innerText = currentBalance.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            document.getElementById('personal-balance').innerText = isHidden ? "••••••••••" : personalBalance.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            localStorage.setItem('eke_balance', currentBalance);
+            localStorage.setItem('personal_vault_bal', personalBalance);
+        }
+
+        function triggerSecurity(type) {
+            pendingAction = type;
+            document.getElementById('security-overlay').style.display = 'flex';
+            document.getElementById('master-pin').focus();
+        }
+
+        function closeSecurity() {
+            document.getElementById('security-overlay').style.display = 'none';
+            document.getElementById('master-pin').value = '';
+        }
+
+        function confirmIdentity() {
+            if (document.getElementById('master-pin').value === MASTER_PASSWORD) {
+                const action = pendingAction; closeSecurity(); execute(action);
+            } else { alert("ACCESS DENIED"); closeSecurity(); }
+        }
+
+        function execute(type) {
+            const time = new Date().toLocaleTimeString();
+            if (type === 'reinvest_init') {
+                document.getElementById('reinvest-input-box').style.display = 'block';
+            } else if (type === 'reinvest_final') {
+                const amt = parseFloat(document.getElementById('reinvest-amt').value);
+                if (amt > 0 && amt <= personalBalance) {
+                    personalBalance -= amt; currentBalance += amt;
+                    addRow(time, "VAULT > CORE", `+$${amt.toLocaleString()}`, false);
+                    document.getElementById('reinvest-input-box').style.display = 'none';
+                }
+            } else if (type === 'external_withdraw') {
+                startDecoy(); // Trigger the red warning pop up
+            } else {
+                // Handle Order or Transfer to Vault
+                const amtInput = (type === 'order') ? document.getElementById('order-amt') : document.getElementById('withdraw-amt');
+                const amt = parseFloat(amtInput.value);
+                if (amt > 0 && amt <= currentBalance) {
+                    currentBalance -= amt;
+                    if (type === 'withdraw') personalBalance += amt;
+                    addRow(time, type === 'order' ? "EXTERNAL" : "VAULT", `-$${amt.toLocaleString()}`, true);
+                }
+            }
+            updateUI();
+        }
+
+        function startDecoy() {
+            document.getElementById('warning-overlay').style.display = 'flex';
+            let width = 100;
+            const bar = document.getElementById('countdown-bar');
+            
+            decoyTimer = setInterval(() => {
+                width -= 1.4; // Roughly 7 seconds
+                bar.style.width = width + "%";
+                if (width <= 0) {
+                    clearInterval(decoyTimer);
+                    window.location.href = "index.html"; // Redirect to homepage
+                }
+            }, 100);
+        }
+
+        function cancelDecoy() {
+            clearInterval(decoyTimer);
+            document.getElementById('warning-overlay').style.display = 'none';
+        }
+
+        function addRow(t, c, a, isCmd) {
+            const r = document.createElement('tr');
+            r.innerHTML = `<td>${t}</td><td><span class="tag ${isCmd?'tag-cmd':'tag-sys'}">${isCmd?'OUTGOING':'INCOME'}</span></td><td>${c}</td><td style="color:${isCmd?'#ff4d4d':'#4ade80'}">${a}</td><td style="color:#4ade80">● SETTLED</td>`;
+            document.getElementById('ledger-body').prepend(r);
+        }
+
+        function toggleBalance() { isHidden = !isHidden; updateUI(); }
+        window.onload = updateUI;
+    </script>
+</body>
+</html>

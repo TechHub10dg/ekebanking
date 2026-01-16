@@ -3,386 +3,432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EKE | Sovereign Resource Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@200;400;600&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+    <title>EKE | Sovereign Wealth Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=IBM+Plex+Mono:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --onyx: #050505;
-            --gold: #c5a059;
-            --gold-muted: #846a3a;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(197, 160, 89, 0.2);
-            --error: #ff4d4d;
-        }
+        :root { --gold: #D4AF37; --black: #050505; --card: #0A0A0A; --green: #4ade80; --red: #ff4d4d; --text: #e0e0e0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: var(--black); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background-color: var(--onyx); 
-            color: #e0e0e0; 
-            font-family: 'Inter', sans-serif; 
-            overflow-x: hidden;
-            background: radial-gradient(circle at 0% 0%, #1a1a1a 0%, #050505 100%);
-        }
+        /* --- GLOBAL REVENUE CLOCK --- */
+        .revenue-header { padding: 80px 8% 40px; text-align: center; background: radial-gradient(circle at top, #0d111a 0%, #050505 100%); }
+        .clock-container { display: inline-block; background: var(--card); border: 1px solid #1a1a1a; padding: 30px 60px; border-radius: 4px; border-bottom: 3px solid var(--gold); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .clock-label { font-family: 'IBM Plex Mono'; font-size: 0.7rem; color: #666; letter-spacing: 4px; margin-bottom: 10px; }
+        #revenue-clock { font-family: 'IBM Plex Mono'; font-size: 4rem; font-weight: 600; color: #fff; letter-spacing: -2px; }
+        .clock-stats { font-size: 0.75rem; color: var(--green); font-family: 'IBM Plex Mono'; margin-top: 15px; display: flex; justify-content: center; gap: 30px; }
 
-        /* --- NAVIGATION --- */
-        nav {
-            position: fixed;
-            top: 0; width: 100%;
-            padding: 1.5rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            z-index: 100;
+        /* --- MAP TERMINAL --- */
+        .map-section { padding: 40px 8%; position: relative; }
+        .map-wrapper { position: relative; background: #080a12; border: 1px solid #111; border-radius: 12px; overflow: hidden; }
+        
+        #map-hud {
+            position: absolute; top: 30px; left: 30px; z-index: 100;
+            background: rgba(5, 5, 5, 0.9); padding: 25px;
+            border: 1px solid var(--gold); font-family: 'IBM Plex Mono', monospace;
+            width: 340px; backdrop-filter: blur(15px); transition: 0.3s;
         }
+/* Navigation Styling */
+nav { 
+    position: fixed; 
+    top: 0; 
+    width: 100%; 
+    padding: 25px 8%; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    z-index: 1000; 
+    background: linear-gradient(to bottom, rgba(5, 5, 5, 0.95), transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
 
-        .brand {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            letter-spacing: 4px;
-            color: var(--gold);
-            text-transform: uppercase;
-        }
+.brand { 
+    font-family: 'Cormorant Garamond', serif; 
+    font-size: 1.8rem; 
+    letter-spacing: 5px; 
+    font-weight: 600; 
+    color: #fff;
+    text-transform: uppercase;
+}
 
-        .nav-links { display: flex; gap: 40px; list-style: none; }
-        .nav-links a { 
-            text-decoration: none; 
-            color: #888; 
-            font-size: 0.75rem; 
-            letter-spacing: 2px; 
-            text-transform: uppercase;
-            transition: 0.4s;
-        }
-        .nav-links a:hover { color: var(--gold); }
+.gold { 
+    color: #D4AF37; 
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
 
-        .secure-input-wrap {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
+.btn-portal { 
+    background: #D4AF37; 
+    color: #000; 
+    border: 1px solid #D4AF37; 
+    padding: 12px 30px; 
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600; 
+    letter-spacing: 2px; 
+    cursor: pointer; 
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border-radius: 2px;
+}
 
-        #master-access-trigger {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            padding: 10px 15px;
-            color: var(--gold);
-            font-family: 'JetBrains Mono', monospace;
-            border-radius: 4px;
-            cursor: pointer;
-            outline: none;
-            transition: 0.3s;
-        }
+.btn-portal:hover { 
+    background: transparent; 
+    color: #fff; 
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+}
 
-        /* --- BIOMETRIC OVERLAY --- */
-        #biometric-gate {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.98);
-            z-index: 9999;
-            display: none; /* Controlled by JS */
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+/* Hero Section Styling */
+.hero { 
+    height: 85vh; 
+    width: 100%; 
+    background: linear-gradient(rgba(5, 5, 5, 0.8), rgba(5, 5, 5, 0.8)), 
+                url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop'); 
+    background-size: cover; 
+    background-position: center; 
+    display: flex; 
+    align-items: center; 
+    padding: 0 8%;
+    border-bottom: 1px solid #111;
+}
 
-        .scan-circle {
-            width: 200px;
-            height: 200px;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            margin-bottom: 2rem;
-        }
+.hero-content h1 { 
+    font-size: 5.5rem; 
+    line-height: 0.95; 
+    margin-bottom: 10px; 
+    font-family: 'Cormorant Garamond', serif; 
+    color: #fff;
+    font-weight: 600;
+}
 
-        .scan-line {
-            position: absolute;
-            width: 110%;
-            height: 2px;
-            background: var(--gold);
-            box-shadow: 0 0 20px var(--gold);
-            top: 0;
-            animation: scanMove 2.5s infinite ease-in-out;
-        }
+.hero-content p {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.6);
+    border-left: 2px solid var(--gold);
+    padding-left: 25px;
+}
 
-        @keyframes scanMove {
-            0% { top: 10%; opacity: 0; }
-            50% { top: 50%; opacity: 1; }
-            100% { top: 90%; opacity: 0; }
-        }
 
-        .status-text {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            color: var(--gold);
-            text-transform: uppercase;
-        }
 
-        /* --- HERO & ASSET GRID --- */
-        .hero {
-            height: 70vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 10%;
-            border-bottom: 1px solid var(--border);
-        }
+        .map-node { cursor: pointer; transition: 0.2s; }
+        .map-node:hover .core-dot { fill: #fff !important; filter: drop-shadow(0 0 10px var(--gold)); }
+        
+        /* --- INTELLIGENCE FEED --- */
+        .intel-section { padding: 40px 8%; display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
+        .intel-box { background: var(--card); border-left: 4px solid var(--gold); padding: 30px; }
+        .update-item { border-bottom: 1px solid #1a1a1a; padding: 15px 0; font-size: 0.85rem; }
+        .timestamp { color: var(--gold); font-family: 'IBM Plex Mono'; font-size: 0.65rem; margin-right: 10px; }
 
-        .hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2rem, 8vw, 5rem);
-            line-height: 1;
-            margin-bottom: 20px;
-        }
-
-        .asset-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 1px;
-            background: var(--border);
-        }
-
-        .asset-card {
-            background: var(--onyx);
-            padding: 4rem 2rem;
-            transition: 0.5s;
-        }
-
-        .asset-card:hover {
-            background: #0a0a0a;
-            padding-left: 2.5rem;
-        }
-
-        .asset-tag {
-            color: var(--gold);
-            font-size: 0.7rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .asset-value {
-            font-size: 2.5rem;
-            font-weight: 200;
-            margin: 1rem 0;
-        }
-
-        .asset-footer {
-            display: flex;
-            justify-content: space-between;
-            color: #555;
-            font-size: 0.8rem;
-        }
-
-        /* --- REFINERY INTERFACE --- */
-        .refinery-status {
-            padding: 80px 10%;
-            background: #080808;
-        }
-
-        .gauge-container {
-            display: flex;
-            gap: 50px;
-            flex-wrap: wrap;
-            margin-top: 40px;
-        }
-
-        .gauge-box {
-            flex: 1;
-            min-width: 250px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            position: relative;
-        }
-
-        .level-bar {
-            height: 4px;
-            background: #222;
-            width: 100%;
-            margin-top: 15px;
-            position: relative;
-        }
-
-        .level-fill {
-            height: 100%;
-            background: var(--gold);
-            width: 78%; /* Sample data */
-            box-shadow: 0 0 10px var(--gold);
-        }
-
-        /* --- BUTTONS --- */
-        .btn-action {
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 15px 30px;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.4s;
-            margin-top: 30px;
-        }
-
-        .btn-action:hover {
-            background: var(--gold);
-            color: black;
-        }
-
-        .verified-badge {
-            color: #4ade80;
-            display: none;
-            font-size: 0.7rem;
-            margin-top: 5px;
-        }
+        /* --- FOOTER --- */
+        footer { padding: 60px 8% 30px; background: #000; border-top: 1px solid #111; font-family: 'IBM Plex Mono'; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 50px; margin-bottom: 40px; }
+        .hub-list { list-style: none; font-size: 0.7rem; opacity: 0.5; line-height: 2; }
     </style>
 </head>
 <body>
-
-    <div id="biometric-gate">
-        <div class="scan-circle">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#c5a059" stroke-width="1">
-                <path d="M12 11c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
-                <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83m-1.64 3.17A5 5 0 0112 17c-2.76 0-5-2.24-5-5 0-2.76 2.24-5 5-5"/>
-                <path d="M12 3c4.97 0 9 4.03 9 9 0 1.18-.23 2.3-.64 3.32m-2.36 5.68A9 9 0 0112 21c-4.97 0-9-4.03-9-9 0-4.97 4.03-9 9-9"/>
-            </svg>
-            <div class="scan-line"></div>
-        </div>
-        <div class="status-text" id="gate-msg">Awaiting Neural Link...</div>
-    </div>
-
     <nav>
-        <div class="brand">EKE <span style="font-weight:200">Sovereign</span></div>
-        <ul class="nav-links">
-            <li><a href="#" onclick="triggerAuth('Real Estate')">Portfolio</a></li>
-            <li><a href="#" onclick="triggerAuth('Refinery Control')">Refinery</a></li>
-            <li><a href="#" onclick="triggerAuth('Capital Markets')">Capital</a></li>
-        </ul>
-        <div class="secure-input-wrap">
-            <input type="text" id="master-access-trigger" placeholder="[ ENTER ACCESS KEY ]" readonly onclick="triggerAuth('Full Terminal')">
-            <div id="verified-status" class="verified-badge">ID: EVAN_KATIE_01 // VERIFIED</div>
-        </div>
-    </nav>
+        <div class="brand">EVAN KATIE <span class="gold">ENTERPRISES</span></div>
+<button class="btn-portal" onclick="validateAccess()">PRIVATE VAULT</button>    </nav>
 
-    <section class="hero">
-        <span class="asset-tag" style="margin-bottom:0">Asset Management v2.6</span>
-        <h1>Empire <br><span style="color:var(--gold)">Infrastructure</span>.</h1>
-        <p style="max-width: 500px; color: #666; font-weight: 300;">Private resource portal for Evan Katie Enterprise. Controlling global refinery output and tier-1 commercial real estate holdings.</p>
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Sovereign Wealth.<br><span class="gold">Global Power.</span></h1>
+            <p style="max-width: 600px; margin-top: 20px; opacity: 0.7;">Managing over $5.5B in liquid assets across the world's most stable economic corridors.</p>
+        </div>
+    </header>
+
+    <header class="revenue-header">
+        <div class="clock-container">
+            <div class="clock-label">CONSOLIDATED ASSET VELOCITY</div>
+            <div id="revenue-clock">$0.00</div>
+            <div class="clock-stats">
+                <span>HUBS: 25 ACTIVE</span>
+                <span>YIELD: +$124.50/SEC</span>
+                <span id="harvest-alert" style="color: #fff; font-weight: bold;"></span>
+            </div>
+        </div>
+    </header>
+
+    <section class="map-section">
+        <div class="map-wrapper">
+            <div id="map-hud">
+                <div style="font-size: 0.6rem; color: #666; letter-spacing: 2px; margin-bottom: 10px;">NODE_INTELLIGENCE</div>
+                <div id="active-hub" style="font-size: 1.4rem; color: #fff; font-family: 'Cormorant Garamond';">SELECT ASSET NODE</div>
+                <hr style="border:0; border-top:1px solid #222; margin:15px 0;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    <div><div style="font-size:0.6rem; color:#555;">YIELD</div><div id="active-val" class="gold" style="font-size:1.1rem;">$ --</div></div>
+                    <div><div style="font-size:0.6rem; color:#555;">EFFICIENCY</div><div id="active-eff" style="color:var(--green); font-size:1.1rem;">--%</div></div>
+                </div>
+                <div id="node-sector" style="margin-top:15px; font-size:0.7rem; color:#888; font-style:italic;">Awaiting data link...</div>
+            </div>
+
+            <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50,150 L350,150 L350,400 L50,400 Z" fill="#090b14" /> <path d="M550,100 L850,100 L850,350 L550,350 Z" fill="#090b14" /> <g class="map-node" onmouseover="updateHUD('New York', '$1.4B', '98.8%', 'Financial Settlements')" id="node-ny">
+                    <circle cx="320" cy="180" r="4" fill="var(--gold)" class="core-dot"/>
+                </g>
+                <g class="map-node" onmouseover="updateHUD('Houston', '$980M', '99.5%', 'Energy Productivity')" id="node-houston">
+                    <circle cx="200" cy="320" r="5" fill="var(--green)" class="core-dot"/>
+                </g>
+                <g class="map-node" onmouseover="updateHUD('Palo Alto', '$845M', '97.2%', 'AI Neural Core')">
+                    <circle cx="80" cy="200" r="4" fill="var(--gold)" class="core-dot"/>
+                </g>
+                <g class="map-node" onmouseover="updateHUD('Delaware', '$310M', '100%', 'Corporate Tax Shell')">
+                    <circle cx="310" cy="195" r="3" fill="var(--green)" class="core-dot"/>
+                </g>
+
+                <g class="map-node" onmouseover="updateHUD('Zurich HQ', '$2.1B', '99.9%', 'Private Wealth')" id="node-zurich">
+                    <circle cx="650" cy="160" r="6" fill="var(--gold)" class="core-dot"/>
+                    <circle cx="650" cy="160" r="12" fill="none" stroke="var(--gold)" stroke-width="0.5" opacity="0.4"/>
+                </g>
+                <g class="map-node" onmouseover="updateHUD('London', '$920M', '98.1%', 'LSE Trade Hub')">
+                    <circle cx="600" cy="130" r="4" fill="var(--green)" class="core-dot"/>
+                </g>
+                <g class="map-node" onmouseover="updateHUD('Frankfurt', '$740M', '96.5%', 'HFT Node')">
+                    <circle cx="670" cy="140" r="4" fill="var(--gold)" class="core-dot"/>
+                </g>
+                <g class="map-node" onmouseover="updateHUD('Oslo', '$540M', '99.7%', 'Sovereign Energy')">
+                    <circle cx="680" cy="80" r="4" fill="var(--green)" class="core-dot"/>
+                </g>
+                <g class="map-node" onmouseover="updateHUD('Miami', '$2.15B', '99.5%', 'Sovereign Energy')">
+                    <circle cx="600" cy="240" r="4" fill="var(--green)" class="core-dot"/>
+                </g>
+                
+                
+                </svg>
+        </div>
     </section>
 
-    <section class="asset-grid">
-        <div class="asset-card">
-            <span class="asset-tag">Real Estate // Dubai</span>
-            <h3>Burj EKE Residential</h3>
-            <div class="asset-value">$412.00M</div>
-            <div class="asset-footer">
-                <span>Occupancy: 98.2%</span>
-                <span>ROI: +12.4%</span>
+    <section class="intel-section">
+        <div class="intel-box">
+            <h3 style="font-family:'IBM Plex Mono'; font-size:0.8rem; color:var(--gold); margin-bottom:20px;">LATEST BUSINESS INTELLIGENCE</h3>
+            <div id="intel-feed">
+                <div class="update-item"><span class="timestamp">[ JAN 1 // 09:00 ]</span> Zurich HQ re-valuation adds $12.5M to equity reserves.</div>
+                <div class="update-item"><span class="timestamp">[ SYSTEM ]</span> Trans-Atlantic capital corridor fully operational.</div>
             </div>
         </div>
-
-        <div class="asset-card">
-            <span class="asset-tag">Refinery // Texas</span>
-            <h3>Delta-9 Crude Processor</h3>
-            <div class="asset-value">1.2M <small>BPD</small></div>
-            <div class="asset-footer">
-                <span>Output: Optimal</span>
-                <span>Brent Crude: $84.20</span>
-            </div>
-        </div>
-
-        <div class="asset-card">
-            <span class="asset-tag">Real Estate // London</span>
-            <h3>Mayfair Sovereign Suites</h3>
-            <div class="asset-value">$890.50M</div>
-            <div class="asset-footer">
-                <span>Status: Private Holding</span>
-                <span>Valuation: Q1 Update</span>
+        <div style="background:var(--card); padding:30px; border:1px solid #1a1a1a;">
+            <h3 style="font-family:'IBM Plex Mono'; font-size:0.8rem; color:#666; margin-bottom:20px;">INCOME HARVEST LOG</h3>
+            <div id="harvest-log" style="font-family:'IBM Plex Mono'; font-size:0.65rem; color:var(--green); line-height:2;">
+                > Awaiting automated settlement...
             </div>
         </div>
     </section>
 
-    <section class="refinery-status">
-        <span class="asset-tag">Strategic Output</span>
-        <h2>Refinery <span style="color:var(--gold)">Telemetry</span></h2>
+   <section class="sectors-section" style="padding: 60px 8%; background: #080a12;">
+    <h2 class="gold" style="font-family: 'Cormorant Garamond'; font-size: 2rem; margin-bottom: 30px; letter-spacing: 2px;">ASSET CLASS ALLOCATION</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
         
-        <div class="gauge-container">
-            <div class="gauge-box">
-                <div class="asset-tag">Storage Capacity</div>
-                <div class="asset-value">88%</div>
-                <div class="level-bar"><div class="level-fill" style="width: 88%;"></div></div>
-            </div>
-            <div class="gauge-box">
-                <div class="asset-tag">Export Pressure</div>
-                <div class="asset-value">4.2 <small>kPSI</small></div>
-                <div class="level-bar"><div class="level-fill" style="width: 65%;"></div></div>
-            </div>
-            <div class="gauge-box">
-                <div class="asset-tag">System Security</div>
-                <div class="asset-value">ACTIVE</div>
-                <div class="level-bar"><div class="level-fill" style="width: 100%; background: #4ade80;"></div></div>
-            </div>
+        <div class="sector-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(212, 175, 55, 0.2); padding: 25px; border-radius: 4px;">
+            <div style="font-size: 0.7rem; color: #666; letter-spacing: 2px;">PRIVATE EQUITY</div>
+            <div style="font-size: 1.8rem; font-family: 'IBM Plex Mono'; margin: 10px 0;">$1.85B</div>
+            <div style="color: #4ade80; font-size: 0.8rem;">↑ 4.2% (YTD)</div>
         </div>
 
-        <button class="btn-action" onclick="triggerAuth('Manual Override')">Request Manual Override</button>
-    </section>
+        <div class="sector-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(212, 175, 55, 0.2); padding: 25px; border-radius: 4px;">
+            <div style="font-size: 0.7rem; color: #666; letter-spacing: 2px;">COMMODITIES (GOLD/OIL)</div>
+            <div style="font-size: 1.8rem; font-family: 'IBM Plex Mono'; margin: 10px 0;">$640.2M</div>
+            <div style="color: #4ade80; font-size: 0.8rem;">↑ 1.1% (L24H)</div>
+        </div>
+
+        <div class="sector-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(212, 175, 55, 0.2); padding: 25px; border-radius: 4px;">
+            <div style="font-size: 0.7rem; color: #666; letter-spacing: 2px;">DIGITAL ASSETS (BTC/ETH)</div>
+            <div style="font-size: 1.8rem; font-family: 'IBM Plex Mono'; margin: 10px 0;">$312.8M</div>
+            <div style="color: #ff4d4d; font-size: 0.8rem;">↓ 0.4% (VOLATILE)</div>
+        </div>
+
+        <div class="sector-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(212, 175, 55, 0.2); padding: 25px; border-radius: 4px;">
+            <div style="font-size: 0.7rem; color: #666; letter-spacing: 2px;">VENTURE CAPITAL</div>
+            <div style="font-size: 1.8rem; font-family: 'IBM Plex Mono'; margin: 10px 0;">$445.0M</div>
+            <div style="color: #fff; opacity: 0.5; font-size: 0.8rem;">STABLE</div>
+        </div>
+    </div>
+</section>
+
+<section class="updates-section" style="padding: 40px 8%; background: #050505;">
+    <div style="background: #0a0a0a; border-left: 4px solid var(--gold); padding: 40px; border-radius: 0 8px 8px 0;">
+        <h3 class="gold" style="font-family: 'IBM Plex Mono'; font-size: 0.9rem; margin-bottom: 25px; letter-spacing: 2px;"> LATEST BUSINESS INTELLIGENCE </h3>
+        
+        <div class="update-item" style="margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 15px; opacity: 0.9;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 0.65rem; color: var(--gold);">[ JAN 16, 2026 // EU_CENTRAL ]</span>
+            <p style="margin-top: 5px; font-size: 0.9rem; font-weight: 300;">
+                <strong style="color: #fff;">Zurich HQ:</strong> Commercial portfolio re-valuation complete. Annualized rental yield increased to <span style="color: #4ade80;">8.4%</span> following successful lease-up of the Bahnhofstrasse tech corridor.
+            </p>
+        </div>
+
+        <div class="update-item" style="margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 15px; opacity: 0.9;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 0.65rem; color: var(--gold);">[ JAN 16, 2026 // US_CENTRAL ]</span>
+            <p style="margin-top: 5px; font-size: 0.9rem; font-weight: 300;">
+                <strong style="color: #fff;">Houston Energy:</strong> Automated AI-dispatching for refinery logistics finalized. Operational overhead reduced by <span style="color: #4ade80;">15%</span>; daily throughput productivity at record highs.
+            </p>
+        </div>
+
+        <div class="update-item" style="margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 15px; opacity: 0.9;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 0.65rem; color: var(--gold);">[ JAN 15, 2026 // EU_WEST ]</span>
+            <p style="margin-top: 5px; font-size: 0.9rem; font-weight: 300;">
+                <strong style="color: #fff;">Frankfurt: </strong> High-Frequency Trading (HFT) revenue for Q1-P1 exceeded targets. Core income stream bolstered by $45M in dividend payouts from the DAX-30 blue-chip holdings.
+            </p>
+        </div>
+
+        <div class="update-item" style="margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 15px; opacity: 0.9;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 0.65rem; color: var(--gold);">[ JAN 14, 2026 // US_EAST ]</span>
+            <p style="margin-top: 5px; font-size: 0.9rem; font-weight: 300;">
+                <strong style="color: #fff;">Delaware Corporate:</strong> Integration of 12 new European subsidiaries into the US tax-efficient shell structure. Estimated tax savings of <span style="color: #4ade80;">$3.2M/month</span> starting Feb 1.
+            </p>
+        </div>
+
+        <div class="update-item" style="margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 15px; opacity: 0.9;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 0.65rem; color: var(--gold);">[ JAN 13, 2026 // US_WEST ]</span>
+            <p style="margin-top: 5px; font-size: 0.9rem; font-weight: 300;">
+                <strong style="color: #fff;">Palo Alto IP:</strong> Licensing revenue from the "Neural Core" patent portfolio activated. Initial royalty payments from three SaaS partners hitting the Houston settlement account.
+            </p>
+        </div>
+
+        <div class="update-item" style="opacity: 0.8;">
+            <span style="font-family: 'IBM Plex Mono'; font-size: 0.7rem; color: #ff4d4d;">[ SYSTEM ALERT ]</span>
+            <p style="margin-top: 5px; font-weight: 300; font-size: 0.85rem; color: #ff4d4d;">
+                Singapore asset liquidation finalized. All capital ($0.78B) successfully bridged to the Luxembourg Sovereign Reserve.
+            </p>
+        </div>
+    </div>
+</section>
+
+<footer style="padding: 80px 8% 40px; border-top: 1px solid rgba(255,255,255,0.05); background: #030303;">
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 60px;">
+        <div>
+            <div class="brand" style="margin-bottom: 20px;">EVAN KATIE <span class="gold">ENTERPRISES</span></div>
+            <p style="font-size: 0.8rem; opacity: 0.4; line-height: 1.6; max-width: 300px;">
+                EKE is a sovereign wealth management vehicle operating under international private banking protocols. 
+                Authorized for global capital movement and strategic asset acquisition.
+            </p>
+        </div>
+        <div>
+    <h4 class="gold" style="font-size: 0.8rem; margin-bottom: 20px; letter-spacing: 2px;">WESTERN CORE HUBS</h4>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <ul style="list-style: none; font-size: 0.75rem; opacity: 0.6; line-height: 1.8;">
+            <li><span class="gold">•</span> Miami, FL (HQ)</li>
+            <li><span class="gold">•</span> Geneva, CH</li>
+            <li><span class="gold">•</span> Houston, TX (Energy)</li>
+            <li><span class="gold">•</span> New York, NY (Finance)</li>
+            <li><span class="gold">•</span> London, UK</li>
+            <li><span class="gold">•</span> Frankfurt, DE</li>
+            <li><span class="gold">•</span> Luxembourg City, LU</li>
+            <li><span class="gold">•</span> Monaco, MC</li>
+            <li><span class="gold">•</span> Palo Alto, CA (Tech)</li>
+            <li><span class="gold">•</span> Zurich, CH</li>
+        </ul>
+        <ul style="list-style: none; font-size: 0.75rem; opacity: 0.6; line-height: 1.8;">
+            <li><span class="gold">•</span> Paris, FR</li>
+            <li><span class="gold">•</span> Milan, IT</li>
+            <li><span class="gold">•</span> Amsterdam, NL</li>
+            <li><span class="gold">•</span> Oslo, NO (Sovereign)</li>
+            <li><span class="gold">•</span> Chicago, IL</li>
+            <li><span class="gold">•</span> Austin, TX</li>
+            <li><span class="gold">•</span> Brussels, BE</li>
+            <li><span class="gold">•</span> Vienna, AT</li>
+            <li><span class="gold">•</span> Dublin, IE</li>
+            <li><span class="gold">•</span> Washington, D.C.</li>
+        </ul>
+    </div>
+</div>
+       
+        <div>
+            <h4 class="gold" style="font-size: 0.8rem; margin-bottom: 20px;">SECURITY</h4>
+            <div style="border: 1px solid #333; padding: 15px; text-align: center;">
+                <div style="font-size: 0.6rem; letter-spacing: 1px; margin-bottom: 5px;">AES-256 ENCRYPTED</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 0.7rem; color: #4ade80;">STATUS: SECURE</div>
+            </div>
+        </div>
+    </div>
+        <div style="text-align:center; font-size:0.5rem; color:#222; border-top:1px solid #111; padding-top:20px;">
+            &copy; 2026 EKE PRIVATE BANKING DIVISION. AES-4096 ENCRYPTION ACTIVE.
+        </div>
+    </footer>
 
     <script>
-        function triggerAuth(resourceName) {
-            const gate = document.getElementById('biometric-gate');
-            const msg = document.getElementById('gate-msg');
-            const badge = document.getElementById('verified-status');
-            const input = document.getElementById('master-access-trigger');
+        // --- 1. CONFIGURATION & STATE ---
+        let totalWealth = parseFloat(localStorage.getItem('eke_balance')) || 10500000000.00;
+        const incomePerSecond = 124.50; 
+        const clockFreq = 50; 
+        const clockIncrement = incomePerSecond / (100 / clockFreq);
 
-            // 1. Open Overlay
-            gate.style.display = 'flex';
-            msg.innerText = `Authorizing Access to ${resourceName}...`;
-            msg.style.color = 'var(--gold)';
+        // ADD THIS TEMPORARILY TO RESET:
+localStorage.setItem('eke_balance', 10500000000.00);
 
-            // 2. Simulate Recognition
-            setTimeout(() => {
-                msg.innerText = "Biometric Match: Master Evan Found.";
-            }, 2000);
+        // --- 2. REVENUE CLOCK ---
+        function runClock() {
+            totalWealth += clockIncrement;
+            document.getElementById('revenue-clock').innerText = totalWealth.toLocaleString('en-US', {
+                style: 'currency', currency: 'USD', minimumFractionDigits: 2
+            });
+            localStorage.setItem('eke_balance', totalWealth);
+        }
+        setInterval(runClock, clockFreq);
 
-            // 3. Success Sequence
-            setTimeout(() => {
-                msg.innerText = "Access Granted. Welcome back.";
-                msg.style.color = "#4ade80";
+        // --- 3. HARVEST ENGINE (THRICE EVERY 2 MINS) ---
+        function triggerHarvest() {
+            const sectors = [
+                { name: "HOUSTON ENERGY", min: 450000, max: 1200000, nodeId: "node-houston" },
+                { name: "ZURICH HQ", min: 800000, max: 2500000, nodeId: "node-zurich" },
+                { name: "LONDON FINANCE", min: 200000, max: 750000, nodeId: "node-ny" },
+                { name: "DELAWARE TAX HUB", min: 1000000, max: 1500000, nodeId: "node-ny" }
+            ];
+
+            const s = sectors[Math.floor(Math.random() * sectors.length)];
+            const profit = Math.floor(Math.random() * (s.max - s.min + 1)) + s.min;
+            
+            // Add to balance instantly
+            totalWealth += profit;
+            
+            // Visual feedback
+            const alertBox = document.getElementById('harvest-alert');
+            alertBox.innerText = `[ HARVEST: +$${(profit/1000000).toFixed(2)}M from ${s.name} ]`;
+            
+            const log = document.getElementById('harvest-log');
+            log.innerHTML = `> RECORDED: +$${profit.toLocaleString()} [${s.name}]<br>` + log.innerHTML;
+
+            // Flash the HUD
+            const hud = document.getElementById('map-hud');
+            hud.style.backgroundColor = "rgba(74, 222, 128, 0.15)";
+            setTimeout(() => { 
+                hud.style.backgroundColor = "rgba(5, 5, 5, 0.9)";
+                alertBox.innerText = "";
             }, 4000);
-
-            // 4. Close and Update UI
-            setTimeout(() => {
-                gate.style.display = 'none';
-                badge.style.display = 'block';
-                input.value = "EVAN_KATIE_SECURE";
-                input.style.borderColor = "#4ade80";
-                
-                // Visual feedback on the resource
-                console.log(`Resource ${resourceName} Unlocked.`);
-            }, 5500);
         }
 
-        // Scroll animations for cards
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = 1;
-                    entry.target.style.transform = "translateY(0)";
-                }
-            });
-        }, { threshold: 0.1 });
+        // Randomizing "thrice every 2 mins" (roughly every 40 seconds)
+        function scheduleHarvests() {
+            const delay = Math.random() * (50000 - 30000) + 30000; 
+            setTimeout(() => { triggerHarvest(); scheduleHarvests(); }, delay);
+        }
+        scheduleHarvests();
 
-        document.querySelectorAll('.asset-card').forEach(el => {
-            el.style.opacity = 0;
-            el.style.transform = "translateY(50px)";
-            el.style.transition = "1s ease-out";
-            observer.observe(el);
-        });
+        // --- 4. MAP INTERACTION ---
+        function updateHUD(name, val, eff, sector) {
+            document.getElementById('active-hub').innerText = name.toUpperCase();
+            document.getElementById('active-val').innerText = val;
+            document.getElementById('active-eff').innerText = eff;
+            document.getElementById('node-sector').innerText = "SECTOR: " + sector;
+        }
+
+        function validateAccess() {
+    // 1. Define the required access key
+    const accessKey = "1234"; // Change this to your desired password
+    
+    // 2. Trigger the system prompt
+    const userInput = prompt("CRITICAL ACCESS PROTOCOL: ENTER SOVEREIGN KEY");
+
+    // 3. Validation Logic
+    if (userInput === accessKey) {
+        alert("ACCESS GRANTED. DECRYPTING VAULT INTERFACE...");
+        window.location.href = 'bankpage.html';
+    } else if (userInput === null) {
+        // User clicked cancel
+        console.log("Authentication Aborted.");
+    } else {
+        alert("ACCESS DENIED. UNAUTHORIZED ENTRY ATTEMPT LOGGED.");
+    }
+}
     </script>
 </body>
 </html>
