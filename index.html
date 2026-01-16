@@ -3,226 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EKE Sovereign | Strategic Resource Node</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Inter:wght@200;400;600&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+    <title>EKE | Sovereign Resource Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@200;400;600&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
     <style>
         :root {
-            --onyx: #030303;
+            --onyx: #050505;
             --gold: #c5a059;
+            --gold-muted: #846a3a;
+            --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(197, 160, 89, 0.2);
-            --system-green: #4ade80;
+            --error: #ff4d4d;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            background: #030303; 
-            color: #f0f0f0; 
+            background-color: var(--onyx); 
+            color: #e0e0e0; 
             font-family: 'Inter', sans-serif; 
-            overflow: hidden;
-            height: 100vh;
+            overflow-x: hidden;
+            background: radial-gradient(circle at 0% 0%, #1a1a1a 0%, #050505 100%);
         }
 
-        /* --- AUTH OVERLAY --- */
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            letter-spacing: 4px;
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+        .nav-links a { 
+            text-decoration: none; 
+            color: #888; 
+            font-size: 0.75rem; 
+            letter-spacing: 2px; 
+            text-transform: uppercase;
+            transition: 0.4s;
+        }
+        .nav-links a:hover { color: var(--gold); }
+
+        .secure-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #master-access-trigger {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            padding: 10px 15px;
+            color: var(--gold);
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        /* --- BIOMETRIC OVERLAY --- */
         #biometric-gate {
             position: fixed;
             inset: 0;
-            background: black;
-            z-index: 10000;
-            display: flex;
+            background: rgba(0,0,0,0.98);
+            z-index: 9999;
+            display: none; /* Controlled by JS */
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.8s ease;
         }
 
-        .scanner-visual {
-            position: relative;
-            width: 180px;
-            height: 180px;
-            border: 1px solid var(--border);
+        .scan-circle {
+            width: 200px;
+            height: 200px;
+            border: 2px solid var(--border);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-        }
-
-        .fingerprint-icon {
-            width: 70px;
-            stroke: var(--gold);
-            fill: none;
-            transition: 0.3s;
+            position: relative;
+            margin-bottom: 2rem;
         }
 
         .scan-line {
             position: absolute;
-            width: 100%;
+            width: 110%;
             height: 2px;
             background: var(--gold);
-            box-shadow: 0 0 15px var(--gold);
+            box-shadow: 0 0 20px var(--gold);
             top: 0;
-            animation: scanning 3s infinite ease-in-out;
+            animation: scanMove 2.5s infinite ease-in-out;
         }
 
-        @keyframes scanning {
+        @keyframes scanMove {
             0% { top: 10%; opacity: 0; }
             50% { top: 50%; opacity: 1; }
             100% { top: 90%; opacity: 0; }
         }
 
-        .status-box {
-            margin-top: 40px;
-            text-align: center;
-        }
-
         .status-text {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             letter-spacing: 3px;
             color: var(--gold);
             text-transform: uppercase;
         }
 
-        .btn-action {
-            margin-top: 20px;
-            background: none;
-            border: 1px solid var(--gold);
+        /* --- HERO & ASSET GRID --- */
+        .hero {
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 10%;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 8vw, 5rem);
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .asset-card {
+            background: var(--onyx);
+            padding: 4rem 2rem;
+            transition: 0.5s;
+        }
+
+        .asset-card:hover {
+            background: #0a0a0a;
+            padding-left: 2.5rem;
+        }
+
+        .asset-tag {
             color: var(--gold);
-            padding: 10px 25px;
             font-size: 0.7rem;
-            letter-spacing: 2px;
-            cursor: pointer;
+            letter-spacing: 3px;
             text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: block;
         }
 
-        /* --- REFINERY DASHBOARD --- */
-        #main-dashboard {
-            display: none;
-            padding: 10% 5%;
-            height: 100vh;
-            background: radial-gradient(circle at top, #111, #000);
+        .asset-value {
+            font-size: 2.5rem;
+            font-weight: 200;
+            margin: 1rem 0;
         }
 
-        .resource-card {
-            border: 1px solid var(--border);
-            padding: 40px;
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.02);
-        }
-
-        .data-row {
+        .asset-footer {
             display: flex;
             justify-content: space-between;
-            margin-top: 30px;
-            font-family: 'JetBrains Mono';
+            color: #555;
+            font-size: 0.8rem;
         }
 
-        .glow-text { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+        /* --- REFINERY INTERFACE --- */
+        .refinery-status {
+            padding: 80px 10%;
+            background: #080808;
+        }
+
+        .gauge-container {
+            display: flex;
+            gap: 50px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .gauge-box {
+            flex: 1;
+            min-width: 250px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            position: relative;
+        }
+
+        .level-bar {
+            height: 4px;
+            background: #222;
+            width: 100%;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .level-fill {
+            height: 100%;
+            background: var(--gold);
+            width: 78%; /* Sample data */
+            box-shadow: 0 0 10px var(--gold);
+        }
+
+        /* --- BUTTONS --- */
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 15px 30px;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.4s;
+            margin-top: 30px;
+        }
+
+        .btn-action:hover {
+            background: var(--gold);
+            color: black;
+        }
+
+        .verified-badge {
+            color: #4ade80;
+            display: none;
+            font-size: 0.7rem;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 
     <div id="biometric-gate">
-        <div class="scanner-visual" id="touch-zone" onclick="startVerification()">
-            <svg class="fingerprint-icon" viewBox="0 0 24 24" stroke-width="1">
+        <div class="scan-circle">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#c5a059" stroke-width="1">
                 <path d="M12 11c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
                 <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83m-1.64 3.17A5 5 0 0112 17c-2.76 0-5-2.24-5-5 0-2.76 2.24-5 5-5"/>
                 <path d="M12 3c4.97 0 9 4.03 9 9 0 1.18-.23 2.3-.64 3.32m-2.36 5.68A9 9 0 0112 21c-4.97 0-9-4.03-9-9 0-4.97 4.03-9 9-9"/>
             </svg>
             <div class="scan-line"></div>
         </div>
+        <div class="status-text" id="gate-msg">Awaiting Neural Link...</div>
+    </div>
+
+    <nav>
+        <div class="brand">EKE <span style="font-weight:200">Sovereign</span></div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="triggerAuth('Real Estate')">Portfolio</a></li>
+            <li><a href="#" onclick="triggerAuth('Refinery Control')">Refinery</a></li>
+            <li><a href="#" onclick="triggerAuth('Capital Markets')">Capital</a></li>
+        </ul>
+        <div class="secure-input-wrap">
+            <input type="text" id="master-access-trigger" placeholder="[ ENTER ACCESS KEY ]" readonly onclick="triggerAuth('Full Terminal')">
+            <div id="verified-status" class="verified-badge">ID: EVAN_KATIE_01 // VERIFIED</div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <span class="asset-tag" style="margin-bottom:0">Asset Management v2.6</span>
+        <h1>Empire <br><span style="color:var(--gold)">Infrastructure</span>.</h1>
+        <p style="max-width: 500px; color: #666; font-weight: 300;">Private resource portal for Evan Katie Enterprise. Controlling global refinery output and tier-1 commercial real estate holdings.</p>
+    </section>
+
+    <section class="asset-grid">
+        <div class="asset-card">
+            <span class="asset-tag">Real Estate // Dubai</span>
+            <h3>Burj EKE Residential</h3>
+            <div class="asset-value">$412.00M</div>
+            <div class="asset-footer">
+                <span>Occupancy: 98.2%</span>
+                <span>ROI: +12.4%</span>
+            </div>
+        </div>
+
+        <div class="asset-card">
+            <span class="asset-tag">Refinery // Texas</span>
+            <h3>Delta-9 Crude Processor</h3>
+            <div class="asset-value">1.2M <small>BPD</small></div>
+            <div class="asset-footer">
+                <span>Output: Optimal</span>
+                <span>Brent Crude: $84.20</span>
+            </div>
+        </div>
+
+        <div class="asset-card">
+            <span class="asset-tag">Real Estate // London</span>
+            <h3>Mayfair Sovereign Suites</h3>
+            <div class="asset-value">$890.50M</div>
+            <div class="asset-footer">
+                <span>Status: Private Holding</span>
+                <span>Valuation: Q1 Update</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="refinery-status">
+        <span class="asset-tag">Strategic Output</span>
+        <h2>Refinery <span style="color:var(--gold)">Telemetry</span></h2>
         
-        <div class="status-box">
-            <p class="status-text" id="status-msg">System Locked: Registration Required</p>
-            <button class="btn-action" id="auth-btn" onclick="registerUser()">Enroll Biometrics</button>
+        <div class="gauge-container">
+            <div class="gauge-box">
+                <div class="asset-tag">Storage Capacity</div>
+                <div class="asset-value">88%</div>
+                <div class="level-bar"><div class="level-fill" style="width: 88%;"></div></div>
+            </div>
+            <div class="gauge-box">
+                <div class="asset-tag">Export Pressure</div>
+                <div class="asset-value">4.2 <small>kPSI</small></div>
+                <div class="level-bar"><div class="level-fill" style="width: 65%;"></div></div>
+            </div>
+            <div class="gauge-box">
+                <div class="asset-tag">System Security</div>
+                <div class="asset-value">ACTIVE</div>
+                <div class="level-bar"><div class="level-fill" style="width: 100%; background: #4ade80;"></div></div>
+            </div>
         </div>
-    </div>
 
-    <div id="main-dashboard">
-        <div class="resource-card">
-            <span style="color:var(--gold); font-size: 0.7rem; letter-spacing: 5px;">EKE SECURE NODE</span>
-            <h1 style="font-family:'Playfair Display'; font-size: 2.5rem; margin: 10px 0;">Refinery Alpha-1</h1>
-            
-            <div class="data-row">
-                <span>Crude Oil Extraction</span>
-                <span class="glow-text">ACTIVE</span>
-            </div>
-            <div class="data-row">
-                <span>Daily Revenue</span>
-                <span class="glow-text">$2.48M</span>
-            </div>
-            <div class="data-row">
-                <span>Global Real Estate</span>
-                <span class="glow-text">14 Holding(s)</span>
-            </div>
-
-            <button class="btn-action" style="width:100%; margin-top:50px;" onclick="location.reload()">Lock Terminal</button>
-        </div>
-    </div>
+        <button class="btn-action" onclick="triggerAuth('Manual Override')">Request Manual Override</button>
+    </section>
 
     <script>
-        const statusMsg = document.getElementById('status-msg');
-        const authBtn = document.getElementById('auth-btn');
-        const gate = document.getElementById('biometric-gate');
-        const dashboard = document.getElementById('main-dashboard');
+        function triggerAuth(resourceName) {
+            const gate = document.getElementById('biometric-gate');
+            const msg = document.getElementById('gate-msg');
+            const badge = document.getElementById('verified-status');
+            const input = document.getElementById('master-access-trigger');
 
-        // On load: check if they registered before
-        window.onload = () => {
-            if (localStorage.getItem('eke_registered')) {
-                statusMsg.innerText = "Identity Found: Awaiting Touch";
-                authBtn.innerText = "Verify Identity";
-            }
-        };
+            // 1. Open Overlay
+            gate.style.display = 'flex';
+            msg.innerText = `Authorizing Access to ${resourceName}...`;
+            msg.style.color = 'var(--gold)';
 
-        // STEP 1: REGISTRATION
-        function registerUser() {
-            statusMsg.innerText = "Detecting Hardware...";
-            
-            // Try to use browser's real WebAuthn if available
-            if (window.PublicKeyCredential && location.protocol === 'https:') {
-                statusMsg.innerText = "Hardware Ready. Scan Finger/Face.";
-            }
-
-            // High-fidelity animation sequence
+            // 2. Simulate Recognition
             setTimeout(() => {
-                statusMsg.innerText = "Registering Biometric Profile...";
-                statusMsg.style.color = "#fff";
-            }, 1000);
-
-            setTimeout(() => {
-                localStorage.setItem('eke_registered', 'true');
-                statusMsg.innerText = "Registration Complete.";
-                statusMsg.style.color = var(--system-green);
-                authBtn.innerText = "Access Terminal";
-                authBtn.onclick = startVerification;
-            }, 3000);
-        }
-
-        // STEP 2: VERIFICATION
-        function startVerification() {
-            if (!localStorage.getItem('eke_registered')) {
-                registerUser();
-                return;
-            }
-
-            statusMsg.innerText = "Verifying Identity...";
-            document.querySelector('.fingerprint-icon').style.stroke = "#4ade80";
-
-            setTimeout(() => {
-                statusMsg.innerText = "Verification Successful.";
-                statusMsg.style.color = "var(--system-green)";
-                
-                // Unlock Sequence
-                setTimeout(() => {
-                    gate.style.opacity = '0';
-                    setTimeout(() => {
-                        gate.style.display = 'none';
-                        dashboard.style.display = 'block';
-                    }, 800);
-                }, 1000);
+                msg.innerText = "Biometric Match: Master Evan Found.";
             }, 2000);
+
+            // 3. Success Sequence
+            setTimeout(() => {
+                msg.innerText = "Access Granted. Welcome back.";
+                msg.style.color = "#4ade80";
+            }, 4000);
+
+            // 4. Close and Update UI
+            setTimeout(() => {
+                gate.style.display = 'none';
+                badge.style.display = 'block';
+                input.value = "EVAN_KATIE_SECURE";
+                input.style.borderColor = "#4ade80";
+                
+                // Visual feedback on the resource
+                console.log(`Resource ${resourceName} Unlocked.`);
+            }, 5500);
         }
+
+        // Scroll animations for cards
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = "translateY(0)";
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.asset-card').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = "translateY(50px)";
+            el.style.transition = "1s ease-out";
+            observer.observe(el);
+        });
     </script>
 </body>
 </html>
